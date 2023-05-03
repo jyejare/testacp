@@ -59,28 +59,6 @@ jobs:
             No-CherryPick
           assignees: ${{ env.assignee }}
 
-      - name: Add Parent PR's PRT comment to Auto_Cherry_Picked PR's
-        id: add-parent-prt-comment
-        if: ${{ always() && steps.cherrypick.outcome == 'success' }}
-        uses: mshick/add-pr-comment@v2
-        with:
-          issue: ${{ steps.cherrypick.outputs.number }}
-          message: ${{ needs.find-the-parent-prt-comment.outputs.prt_comment }}
-          repo-token: ${{ secrets.CHERRYPICK_PAT }}
-
-      - name: is autoMerging enabled for Auto CherryPicked PRs ?
-        if: ${{ always() && steps.cherrypick.outcome == 'success' && contains(github.event.pull_request.labels.*.name, 'AutoMerge_Cherry_Picked') }}
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.CHERRYPICK_PAT }}
-          script: |
-            github.rest.issues.addLabels({
-              issue_number: ${{ steps.cherrypick.outputs.number }},
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              labels: ["AutoMerge_Cherry_Picked"]
-            })
-
       ## Failure Logging to issues and GChat Group
       - name: Create Github issue on cherrypick failure
         id: create-issue
